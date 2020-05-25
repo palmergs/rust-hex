@@ -29,7 +29,7 @@ static HEX_DIRECTIONS: [Hex; 6] = [
 impl Hex {
     pub fn build(q: i64, r: i64, s: i64) -> Hex {
         assert!(q + r + s == 0);
-        Hex { q: q, r: r, s: s }
+        Hex { q, r, s }
     }
 
     pub fn add(&self, hex: &Hex) -> Hex {
@@ -71,7 +71,7 @@ struct FractionalHex {
 
 impl FractionalHex {
     fn build(q: f64, r: f64, s: f64) -> FractionalHex {
-        FractionalHex{q: q, r: r, s: s}
+        FractionalHex{ q, r, s }
     }
 }
 
