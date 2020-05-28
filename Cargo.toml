@@ -3,8 +3,14 @@ name = "rust-hex"
 version = "0.1.0"
 authors = ["Galen Palmer <palmergs@gmail.com>"]
 edition = "2018"
+license = "MIT"
+description = "Experiments in rendering hex layouts using WASM"
+repository = "git@github.com:palmergs/rust-hex.git"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+crate-type = ["cdylib"]
 
 [dependencies]
 lazy_static = "*"
+wasm-bindgen = "^0.2"
