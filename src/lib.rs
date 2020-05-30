@@ -2,6 +2,7 @@
 extern crate lazy_static;
 
 use std::f64;
+use std::sync::atomic::{AtomicUsize,Ordering};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 // use web_sys::{window, HtmlCanvasElement, CanvasRenderingContext2d};
@@ -9,9 +10,11 @@ use wasm_bindgen::JsCast;
 mod axial;
 mod cube;
 
+static WEASEL_COUNT: AtomicUsize = AtomicUsize::new(0);
+
 #[wasm_bindgen]
 pub fn weasel() -> String {
-  "there are so many weasels here".to_string()
+  format!("there are {} weasels here", WEASEL_COUNT.fetch_add(1, Ordering::SeqCst))
 }
 
 #[wasm_bindgen]
