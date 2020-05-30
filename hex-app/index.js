@@ -12,6 +12,7 @@ window.onload = () => {
   resizeCanvas();
   console.log(wasm.weasel());
   console.log(wasm.smile());
+  wasm.start_loop();
 }
 
 window.onresize = () => {

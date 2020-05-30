@@ -25,4 +25,5 @@ features = [
   "Element",
   "HtmlCanvasElement",
   "Window",
+  "Performance",
 ]
