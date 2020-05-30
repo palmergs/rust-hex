@@ -29,9 +29,11 @@ pub fn smile() -> String {
     dyn_into::<web_sys::CanvasRenderingContext2d>().
     unwrap();
 
-  draw_smile(&con, 75.0, 75.0, 50.0);
-  draw_smile(&con, 145.0, 145.0, 40.0);
-  draw_smile(&con, 200.0, 200.0, 30.0);
+  for n in 0..10 {
+    draw_smile(&con, 75.0 + (n as f64 * 110.0), 75.0, 50.0);
+    draw_smile(&con, 145.0 + (n as f64 * 100.0), 175.0, 40.0);
+    draw_smile(&con, 200.0 + (n as f64 * 100.0), 220.0, 30.0);
+  }
 
 
   "Did I smile?".to_string()

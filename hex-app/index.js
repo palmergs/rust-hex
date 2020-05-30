@@ -1,10 +1,21 @@
 import * as wasm from "rust-hex";
 
-function normalJS() {
-  console.log("In a normal JS file");
+function resizeCanvas() {
+  console.log("resizing canvas...");
+  let can = document.getElementById("canvas");
+  can.width = document.body.clientWidth;
+  can.height = document.body.clientHeight;
+  console.log("...canvas resized");
+};
+
+window.onload = () => {
+  resizeCanvas();
+  console.log(wasm.weasel());
+  console.log(wasm.smile());
 }
 
-normalJS();
-console.log("Did this work?");
-console.log(wasm.weasel());
-console.log(wasm.smile());
+window.onresize = () => {
+  resizeCanvas();
+  console.log(wasm.weasel());
+  console.log(wasm.smile());
+}
