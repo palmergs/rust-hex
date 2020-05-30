@@ -1,3 +1,3 @@
-import * as wasm from "hello-wasm-pack";
+import * as wasm from "rust-hex";
 
-wasm.greet();
+console.log(wasm.weasel());
