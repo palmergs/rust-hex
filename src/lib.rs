@@ -5,6 +5,7 @@ use std::f64;
 use std::sync::atomic::{AtomicUsize,Ordering};
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::time::{Duration, Instant, UNIX_EPOCH};
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -57,24 +58,13 @@ fn frame(f: &Closure<dyn FnMut()>) {
   window().request_animation_frame(f.as_ref().unchecked_ref()).expect("should get animation frame");
 }
 
-fn update_framerate() {
-  let now = now();
-  if let Some(last) = element("performance").get_attribute("timestamp") {
-    if let Ok(n) = last.parse::<f64>() {
-      let diff = (now - n) / 10 as f64;
-      element("performance").set_text_content(Some(&format!("{}", diff)));
-    }
-  }
-  element("performance").set_attribute("timestamp", &now.to_string()).unwrap();
-}
-
 #[wasm_bindgen]
 pub fn start_loop() -> Result<(), JsValue> {
   let f = Rc::new(RefCell::new(None));
   let g = f.clone();
   let mut i = 0;
+  let performance = window().performance().expect("performance should be avilable");
   
-
   *g.borrow_mut() = Some(Closure::wrap(Box::new(move || {
     if false {
       element("frame").set_text_content(Some("All done!"));
@@ -87,9 +77,9 @@ pub fn start_loop() -> Result<(), JsValue> {
     i += 1;
     element("frame").set_text_content(Some(&i.to_string()));
     if i % 10 == 0 {
-      update_framerate();
+      let avg = performance.now() / i as f64;
+      element("performance").set_text_content(Some(&format!("{:.2}", avg)));
     }
-
     
     frame(f.borrow().as_ref().unwrap());
   }) as Box<dyn FnMut()>));
