@@ -1,10 +1,20 @@
 pub struct Offset {
-  pub row: i64,
-  pub col: i64,
+  pub col: i32,
+  pub row: i32,
 }
 
 impl Offset {
-  pub fn new(col: i64, row: i64) -> Offset {
+  pub const EVEN: i32 = 1;
+  pub const ODD: i32 = -1;
+
+  pub fn new(col: i32, row: i32) -> Offset {
     Offset{ col, row }
   }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::{Offset};
+
+
 }

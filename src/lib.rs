@@ -14,6 +14,9 @@ mod axial;
 mod cube;
 use cube::{ Hex, FractionalHex };
 
+mod offset;
+use offset::{ Offset };
+
 mod layout;
 use layout::{ Layout, Point };
 
@@ -150,16 +153,30 @@ pub fn draw_hexes() -> String {
     dyn_into::<web_sys::CanvasRenderingContext2d>().
     unwrap();
 
-  let layout = Layout::pointy(center(), Point::new(50.0, 50.0));
-  let hex = layout.to_fractional_hex(&center()).to_hex();
-  let corners = layout.polygon_corners(&hex);
+  con.set_stroke_style(&JsValue::from("rgba(200, 120, 120, 0.5)"));
+  let layout = Layout::flat(Point::new(20.0, 20.0), Point::ORIGIN);
+  for q in 0..20 {
+    for r in 0..20 {
+      draw_hex(&con, &layout, &Hex::axial(q, r));
+    }
+  }
+  
 
-  format!("CORNERS = {:?}", corners)
+  "Done!".to_string()
 }
 
-fn draw_hex(layout: &Layout, con: &web_sys::CanvasRenderingContext2d, x: f64, y: f64, r: f64) {
+fn draw_hex(con: &web_sys::CanvasRenderingContext2d, layout: &Layout, hex: &Hex) {
+  
+  let corners = layout.polygon_corners(&hex);
   con.begin_path();
-
+  con.move_to(corners[0].x, corners[0].y);
+  con.line_to(corners[1].x, corners[1].y);
+  con.line_to(corners[2].x, corners[2].y);
+  con.line_to(corners[3].x, corners[3].y);
+  con.line_to(corners[4].x, corners[4].y);
+  con.line_to(corners[5].x, corners[5].y);
+  con.line_to(corners[0].x, corners[0].y);
+  con.stroke();
 } 
 
 #[cfg(test)]

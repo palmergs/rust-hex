@@ -24,9 +24,9 @@ static HEX_DIRECTIONS: [Hex; 6] = [
     Hex { q: 0, r: 1, s: -1 },
 ];
 
-static ORIGIN: Hex = Hex{ q: 0, r: 0, s: 0};
-
 impl Hex {
+    pub const ORIGIN: Hex = Hex{ q: 0, r: 0, s: 0 };
+
     pub fn new(q: i64, r: i64, s: i64) -> Hex {
         assert!(q + r + s == 0);
         Hex::build(q, r, s)
@@ -78,6 +78,10 @@ impl Hex {
     pub fn rotate_right(&self) -> Hex {
         Hex::build(-self.r, -self.s, -self.q)
     }
+
+    pub fn fractional(&self) -> FractionalHex {
+        FractionalHex::new(self.q as f64, self.r as f64, self.s as f64)
+    }
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -88,14 +92,18 @@ pub struct FractionalHex {
 }
 
 impl FractionalHex {
+    pub fn new(q: f64, r: f64, s: f64) -> FractionalHex {
+        FractionalHex::build(q, r, s)
+    }
+
     pub fn build(q: f64, r: f64, s: f64) -> FractionalHex {
         FractionalHex{ q, r, s }
     }
 
-    pub fn to_hex(&self) -> Hex {
-        let mut q = self.q.round()as i64; // self.q.round() as i64;
-        let mut r = self.r.round()as i64;
-        let mut s = self.s.round()as i64;
+    pub fn round(&self) -> Hex {
+        let mut q = self.q.round() as i64; // self.q.round() as i64;
+        let mut r = self.r.round() as i64;
+        let mut s = self.s.round() as i64;
         let q_diff = (q as f64 - self.q).abs();
         let r_diff = (r as f64 - self.r).abs();
         let s_diff = (s as f64 - self.s).abs();
@@ -112,7 +120,7 @@ impl FractionalHex {
 
 #[cfg(test)]
 mod tests {
-    use super::{ Hex, HEX_DIRECTIONS, ORIGIN };
+    use super::{ Hex, FractionalHex, HEX_DIRECTIONS };
 
     #[test]
     fn arithmetic() {
@@ -132,7 +140,7 @@ mod tests {
 
     #[test]
     fn distance() {
-        assert_eq!(7, Hex::new(3, -7, 4).distance(&ORIGIN))
+        assert_eq!(7, Hex::new(3, -7, 4).distance(&Hex::ORIGIN))
     }
 
     #[test]
@@ -143,6 +151,12 @@ mod tests {
     #[test]
     fn rotate_left() {
         assert_eq!(Hex::new(1, -3, 2).rotate_left(), Hex::new(-2, -1, 3));
+    }
+
+    #[test]
+    fn fractional_round_trip() {
+        let hex = Hex::new(4, -10, 6);
+        assert_eq!(hex, hex.fractional().round());
     }
 
     #[test]
