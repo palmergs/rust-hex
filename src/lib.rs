@@ -10,7 +10,12 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
 mod axial;
+
 mod cube;
+use cube::{ Hex, FractionalHex };
+
+mod layout;
+use layout::{ Layout, Point };
 
 static WEASEL_COUNT: AtomicUsize = AtomicUsize::new(0);
 
@@ -25,6 +30,16 @@ fn window() -> web_sys::Window {
 
 fn document() -> web_sys::Document {
   window().document().expect("should have a document on window")
+}
+
+fn body() -> web_sys::HtmlElement {
+  document().body().expect("document should have a body")
+}
+
+fn center() -> Point {
+  let width = body().client_width() as f64;
+  let height = body().client_height() as f64;
+  Point::new(width / 2.0, height / 2.0)
 }
 
 fn now() -> f64 {
@@ -55,6 +70,7 @@ pub fn start_loop() -> Result<(), JsValue> {
   let f = Rc::new(RefCell::new(None));
   let g = f.clone();
   let mut i = 0;
+  
 
   *g.borrow_mut() = Some(Closure::wrap(Box::new(move || {
     if false {
@@ -100,7 +116,6 @@ pub fn smile() -> String {
     draw_smile(&con, 200.0 + (n as f64 * 100.0), 220.0, 30.0);
   }
 
-
   "Did I smile?".to_string()
 }
 
@@ -119,6 +134,33 @@ fn draw_smile(con: &web_sys::CanvasRenderingContext2d, x: f64, y: f64, r: f64) {
   
   con.stroke();
 }
+
+#[wasm_bindgen]
+pub fn draw_hexes() -> String {
+  let doc = document();
+  let can = doc.get_element_by_id("canvas").unwrap();
+  let can: web_sys::HtmlCanvasElement = can.
+    dyn_into::<web_sys::HtmlCanvasElement>().
+    map_err(|_| ()).
+    unwrap();
+
+  let con = can.get_context("2d").
+    unwrap().
+    unwrap().
+    dyn_into::<web_sys::CanvasRenderingContext2d>().
+    unwrap();
+
+  let layout = Layout::pointy(center(), Point::new(50.0, 50.0));
+  let hex = layout.to_fractional_hex(&center()).to_hex();
+  let corners = layout.polygon_corners(&hex);
+
+  format!("CORNERS = {:?}", corners)
+}
+
+fn draw_hex(layout: &Layout, con: &web_sys::CanvasRenderingContext2d, x: f64, y: f64, r: f64) {
+  con.begin_path();
+
+} 
 
 #[cfg(test)]
 mod tests {

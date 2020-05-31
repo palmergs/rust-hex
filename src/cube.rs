@@ -8,8 +8,6 @@
 //    SOUTH = 5,
 //}
 
-use std::f64::consts::PI;
-
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Hex {
     pub q: i64,
@@ -26,11 +24,23 @@ static HEX_DIRECTIONS: [Hex; 6] = [
     Hex { q: 0, r: 1, s: -1 },
 ];
 
+static ORIGIN: Hex = Hex{ q: 0, r: 0, s: 0};
+
 impl Hex {
-    pub fn build(q: i64, r: i64, s: i64) -> Hex {
+    pub fn new(q: i64, r: i64, s: i64) -> Hex {
         assert!(q + r + s == 0);
-        Hex { q, r, s }
+        Hex::build(q, r, s)
     }
+
+    pub fn axial(q: i64, r: i64) -> Hex {
+        let s: i64 = -q - r;
+        assert!(q + r + s == 0);
+        Hex::build(q, r, s)
+    } 
+    
+    pub fn build(q: i64, r: i64, s: i64) -> Hex {
+        Hex { q, r, s }
+    }    
 
     pub fn add(&self, hex: &Hex) -> Hex {
         Hex::build(self.q + hex.q, self.r + hex.r, self.s + hex.s)
@@ -60,95 +70,80 @@ impl Hex {
     pub fn neighbor(&self, dir: isize) -> Hex {
         Hex::direction(dir).add(self)
     }
+
+    pub fn rotate_left(&self) -> Hex {
+        Hex::build(-self.s, -self.q, -self.r)
+    }
+
+    pub fn rotate_right(&self) -> Hex {
+        Hex::build(-self.r, -self.s, -self.q)
+    }
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]
-struct FractionalHex {
+pub struct FractionalHex {
     q: f64,
     r: f64,
     s: f64,
 }
 
 impl FractionalHex {
-    fn build(q: f64, r: f64, s: f64) -> FractionalHex {
+    pub fn build(q: f64, r: f64, s: f64) -> FractionalHex {
         FractionalHex{ q, r, s }
     }
-}
 
-
-#[derive(Debug, Copy, Clone, PartialEq)]
-pub struct Orientation {
-    f0: f64,
-    f1: f64,
-    f2: f64,
-    f3: f64,
-    b0: f64,
-    b1: f64,
-    b2: f64,
-    b3: f64,
-    start_angle: f64,
-}
-
-lazy_static! {
-    static ref LAYOUT_POINTY: Orientation = Orientation{
-        f0: 3.0f64.sqrt(), f1: 3.0f64.sqrt() / 2.0f64, f2: 0.0, f3: 3.0f64 / 2.0f64,
-        b0: 3.0f64.sqrt() / 3.0f64, b1: -1.0f64 / 3.0f64, b2: 0.0, b3: 2.0f64 / 3.0f64,
-        start_angle: 0.5f64};
-
-    static ref LAYOUT_FLAT: Orientation = Orientation{
-        f0: 3.0f64 / 2.0f64, f1: 0.0, f2: 3.0f64.sqrt() / 2.0f64, f3: 3.0f64.sqrt(),
-        b0: 2.0f64 / 3.0f64, b1: 0.0, b2: -1.0f64 / 3.0f64, b3: 3.0f64.sqrt() / 3.0f64,
-        start_angle: 0.0};
-}
-
-#[derive(Debug, Copy, Clone, PartialEq)]
-pub struct Point(f64, f64);
-
-pub struct Layout {
-    orientation: &'static Orientation,
-    size: Point,
-    origin: Point,
-}
-
-impl Layout {
-    pub fn build(orientation: &'static Orientation, size: Point, origin: Point) -> Layout {
-        Layout{orientation: orientation, size: size, origin: origin}
-    }
-
-    pub fn to_pixel(&self, h: &Hex) -> Point {
-        let m = self.orientation;
-        let x = (m.f0 * h.q as f64 + m.f1 * h.r as f64) * self.size.0;
-        let y = (m.f2 * h.q as f64 + m.f3 * h.r as f64) * self.size.1;
-        Point(x + self.origin.0, y + self.origin.1)
-    }
-
-    pub fn to_hex(&self, p: &Point) -> FractionalHex {
-        let m = self.orientation;
-        let q = m.b0 * p.0 + m.b1 * p.1;
-        let r = m.b2 * p.0 + m.b3 * p.1;
-        FractionalHex::build(q, r, -q - r)
-    }
-
-    pub fn polygon_corners(&self, h: &Hex) -> Vec<Point> {
-        let mut vec: Vec<Point> = Vec::new();
-        let center = self.to_pixel(h);
-        for i in 0..6 {
-            let offset = self.hex_corner_offset(i);
-            vec.push(Point(center.0 + offset.0, center.1 + offset.1))
+    pub fn to_hex(&self) -> Hex {
+        let mut q = self.q.round()as i64; // self.q.round() as i64;
+        let mut r = self.r.round()as i64;
+        let mut s = self.s.round()as i64;
+        let q_diff = (q as f64 - self.q).abs();
+        let r_diff = (r as f64 - self.r).abs();
+        let s_diff = (s as f64 - self.s).abs();
+        if q_diff > r_diff && q_diff > s_diff {
+            q = -r - s;
+        } else if r_diff > s_diff {
+            r = -q -s;
+        } else {
+            s = -q - r;
         }
-        vec
-    }
-
-    fn hex_corner_offset(&self, corner: usize) -> Point {
-        let angle = 2.0 * PI * (self.orientation.start_angle + corner as f64) / 6.0f64;
-        Point(self.size.0 * angle.cos(), self.size.1 * angle.sin())
+        return Hex{ q, r, s }
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use super::{ Hex, HEX_DIRECTIONS, ORIGIN };
 
-    use super::{ Hex, HEX_DIRECTIONS, Layout, LAYOUT_POINTY, LAYOUT_FLAT, Point };
+    #[test]
+    fn arithmetic() {
+        assert_eq!(Hex::new(4, -10, 6), Hex::new(1, -3, 2).add(&Hex::new(3, -7, 4)));
+        assert_eq!(Hex::new(-2, 4, -2), Hex::new(1, -3, 2).subtract(&Hex::new(3, -7, 4)));
+    }
+
+    #[test]
+    fn direction() {
+        assert_eq!(Hex::new(0, -1, 1), *Hex::direction(2));
+    }
+
+    #[test]
+    fn neighbor() {
+        assert_eq!(Hex::new(1, -3, 2), Hex::new(1, -2, 1).neighbor(2));
+    }
+
+    #[test]
+    fn distance() {
+        assert_eq!(7, Hex::new(3, -7, 4).distance(&ORIGIN))
+    }
+
+    #[test]
+    fn rotate_right() {
+        assert_eq!(Hex::new(1, -3, 2).rotate_right(), Hex::new(3, -2, -1));
+    }
+
+    #[test]
+    fn rotate_left() {
+        assert_eq!(Hex::new(1, -3, 2).rotate_left(), Hex::new(-2, -1, 3));
+    }
 
     #[test]
     fn direction_supports_any_value() {
@@ -157,12 +152,6 @@ mod tests {
         assert_eq!(*Hex::direction(-6), HEX_DIRECTIONS[0]);    
         assert_eq!(*Hex::direction(12), HEX_DIRECTIONS[0]);    
         assert_eq!(*Hex::direction(-12), HEX_DIRECTIONS[0]);    
-    }
-
-    #[test]
-    fn build_layout_with_orientation() {
-        let pointy = Layout::build(&LAYOUT_POINTY, Point(100.0, 100.0), Point(0.0, 0.0));
-        let flat = Layout::build(&LAYOUT_FLAT, Point(100.0, 100.0), Point(0.0, 0.0));
     }
 }
 
