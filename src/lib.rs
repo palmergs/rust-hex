@@ -126,6 +126,7 @@ mod tests {
 
   #[test]
   fn test_weasel() {
-    assert_eq!(weasel(), "there are so many weasels here")
+    assert_eq!(weasel(), "there are 0 weasels here");
+    assert_eq!(weasel(), "there are 1 weasels here");
   }
 }
