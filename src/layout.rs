@@ -92,7 +92,7 @@ impl Layout {
         FractionalHex::build(q, r, -q - r)
     }
 
-    pub fn polygon_corners(&self, h: &Hex) -> Vec<Point> {
+    pub fn polygon_corners(&self, h: &Hex) -> (Vec<Point>, Point) {
         let mut vec: Vec<Point> = Vec::new();
         let center = self.to_pixel(h);
         for i in 0..6 {
@@ -102,7 +102,7 @@ impl Layout {
                 y: center.y + offset.y,
             })
         }
-        vec
+        (vec, center)
     }
 
     fn hex_corner_offset(&self, corner: usize) -> Point {

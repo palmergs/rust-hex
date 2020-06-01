@@ -155,7 +155,7 @@ pub fn draw_hexes() -> String {
         1 => Offset::q_to_hex(col, row, Offset::ODD),
         _ => panic!("srsly? how did mod integer"),
       };
-      draw_hex(&con, &layout, &hex);
+      draw_hex(&con, &layout, &hex, col, row);
     }
   }
   
@@ -163,12 +163,10 @@ pub fn draw_hexes() -> String {
   "Done!".to_string()
 }
 
-fn draw_hex(con: &web_sys::CanvasRenderingContext2d, layout: &Layout, hex: &Hex) {
+fn draw_hex(con: &web_sys::CanvasRenderingContext2d, layout: &Layout, hex: &Hex, col: i64, row: i64) {
   
-  let corners = layout.polygon_corners(&hex);
-  con.fill_text(&hex.q.to_string(), corners[0].x + 5.0f64, corners[0].y - 18.0f64).unwrap();
-  con.fill_text(&hex.r.to_string(), corners[2].x + 9.0f64, corners[2].y - 3.0f64).unwrap();
-  con.fill_text(&hex.s.to_string(), corners[4].x - 3.0f64, corners[4].y - 3.0f64).unwrap();
+  let (corners, center) = layout.polygon_corners(&hex);
+  con.fill_text(&format!("{},{}", row, col), center.x, center.y).unwrap();
 
   con.begin_path();  
   con.move_to(corners[0].x, corners[0].y);
