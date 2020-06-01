@@ -126,7 +126,7 @@ fn draw_smile(con: &web_sys::CanvasRenderingContext2d, x: f64, y: f64, r: f64) {
 pub fn draw_hexes() -> String {
   let width = body().client_width() as f64;
   let height = body().client_height() as f64;
-  let size = 10f64;
+  let size = 15f64;
 
   let doc = document();
   let can = doc.get_element_by_id("canvas").unwrap();
@@ -142,7 +142,9 @@ pub fn draw_hexes() -> String {
     unwrap();
 
   con.set_stroke_style(&JsValue::from("rgba(100, 100, 100, 0.5)"));
+  con.set_fill_style(&JsValue::from("rgba(100, 100, 255, 0.5)"));
   con.set_line_width(0.25);
+  con.set_font("7px sans-serif");
   let layout = Layout::flat(Point::new(size, size), Point::ORIGIN);
   let cols = width / size;
   let rows = height / size;
@@ -164,7 +166,11 @@ pub fn draw_hexes() -> String {
 fn draw_hex(con: &web_sys::CanvasRenderingContext2d, layout: &Layout, hex: &Hex) {
   
   let corners = layout.polygon_corners(&hex);
-  con.begin_path();
+  con.fill_text(&hex.q.to_string(), corners[0].x + 5.0f64, corners[0].y - 18.0f64).unwrap();
+  con.fill_text(&hex.r.to_string(), corners[2].x + 9.0f64, corners[2].y - 3.0f64).unwrap();
+  con.fill_text(&hex.s.to_string(), corners[4].x - 3.0f64, corners[4].y - 3.0f64).unwrap();
+
+  con.begin_path();  
   con.move_to(corners[0].x, corners[0].y);
   con.line_to(corners[1].x, corners[1].y);
   con.line_to(corners[2].x, corners[2].y);
