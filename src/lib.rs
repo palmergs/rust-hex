@@ -40,12 +40,6 @@ fn body() -> web_sys::HtmlElement {
   document().body().expect("document should have a body")
 }
 
-fn center() -> Point {
-  let width = body().client_width() as f64;
-  let height = body().client_height() as f64;
-  Point::new(width / 2.0, height / 2.0)
-}
-
 fn now() -> f64 {
   window().performance().expect("should have a performance object").now()
 }
@@ -130,6 +124,10 @@ fn draw_smile(con: &web_sys::CanvasRenderingContext2d, x: f64, y: f64, r: f64) {
 
 #[wasm_bindgen]
 pub fn draw_hexes() -> String {
+  let width = body().client_width() as f64;
+  let height = body().client_height() as f64;
+  let size = 10f64;
+
   let doc = document();
   let can = doc.get_element_by_id("canvas").unwrap();
   let can: web_sys::HtmlCanvasElement = can.
@@ -143,10 +141,13 @@ pub fn draw_hexes() -> String {
     dyn_into::<web_sys::CanvasRenderingContext2d>().
     unwrap();
 
-  con.set_stroke_style(&JsValue::from("rgba(200, 120, 120, 0.5)"));
-  let layout = Layout::flat(Point::new(20.0, 20.0), Point::ORIGIN);
-  for col in 0..20 {
-    for row in 0..20 {
+  con.set_stroke_style(&JsValue::from("rgba(100, 100, 100, 0.5)"));
+  con.set_line_width(0.25);
+  let layout = Layout::flat(Point::new(size, size), Point::ORIGIN);
+  let cols = width / size;
+  let rows = height / size;
+  for col in 0..cols as i64 {
+    for row in 0..rows as i64 {
       let hex = match row % 2 {
         0 => Offset::q_to_hex(col, row, Offset::EVEN),
         1 => Offset::q_to_hex(col, row, Offset::ODD),

@@ -4,7 +4,7 @@ function resizeCanvas() {
   console.log("resizing canvas...");
   let can = document.getElementById("canvas");
   can.width = document.body.clientWidth;
-  can.height = document.body.clientHeight;
+  // can.height = document.body.clientHeight;
   console.log("...canvas resized: ", can.width, can.height);
 };
 
