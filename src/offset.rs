@@ -28,18 +28,20 @@ impl Offset {
     Offset{ col, row }
   }
 
-  pub fn q_to_hex(&self, offset: i64) -> Hex {
+  // "q" types are used with flat tops.
+  pub fn q_to_hex(col: i64, row: i64, offset: i64) -> Hex {
     assert!(offset == Offset::EVEN || offset == Offset::ODD);
-    let q = self.col;
-    let r = self.row - (self.col + offset * (self.col & 1)) / 2;
+    let q = col;
+    let r = row - (col + offset * (col & 1)) / 2;
     let s = -q - r;
     Hex{ q, r, s }
   }
 
-  pub fn r_to_hex(&self, offset: i64) -> Hex {
+  // "r" types are used with pointy tops.
+  pub fn r_to_hex(col: i64, row: i64, offset: i64) -> Hex {
     assert!(offset == Offset::EVEN || offset == Offset::ODD);
-    let q = self.col - (self.row + offset * (self.row & 1)) / 2;
-    let r = self.row;
+    let q = col - (row + offset * (row & 1)) / 2;
+    let r = row;
     let s = -q - r;
     Hex { q, r, s }
   }
@@ -53,16 +55,16 @@ mod tests {
   fn offset_qroundtrip() {
     let hex = Hex::new(3, 4, -7);
     let noff = Offset::qoffset(Offset::EVEN, &hex);
-    assert_eq!(hex, noff.q_to_hex(Offset::EVEN));
+    assert_eq!(hex, Offset::q_to_hex(noff.col, noff.row, Offset::EVEN));
 
     let noff = Offset::qoffset(Offset::ODD, &hex);
-    assert_eq!(hex, noff.q_to_hex(Offset::ODD));
+    assert_eq!(hex, Offset::q_to_hex(noff.col, noff.row, Offset::ODD));
 
     let offset = Offset::new(1, -3);
-    let nhex = offset.q_to_hex(Offset::EVEN);
+    let nhex = Offset::q_to_hex(offset.col, offset.row, Offset::EVEN);
     assert_eq!(offset, Offset::qoffset(Offset::EVEN, &nhex));
 
-    let nhex = offset.q_to_hex(Offset::ODD);
+    let nhex = Offset::q_to_hex(offset.col, offset.row, Offset::ODD);
     assert_eq!(offset, Offset::qoffset(Offset::ODD, &nhex));
   }
 
@@ -70,16 +72,16 @@ mod tests {
   fn offset_rroundtrip() {
     let hex = Hex::new(3, 4, -7);
     let noff = Offset::roffset(Offset::EVEN, &hex);
-    assert_eq!(hex, noff.r_to_hex(Offset::EVEN));
+    assert_eq!(hex, Offset::r_to_hex(noff.col, noff.row, Offset::EVEN));
 
     let noff = Offset::roffset(Offset::ODD, &hex);
-    assert_eq!(hex, noff.r_to_hex(Offset::ODD));    
+    assert_eq!(hex, Offset::r_to_hex(noff.col, noff.row, Offset::ODD));    
 
     let offset = Offset::new(1, -3);
-    let nhex = offset.r_to_hex(Offset::EVEN);
+    let nhex = Offset::r_to_hex(offset.col, offset.row, Offset::EVEN);
     assert_eq!(offset, Offset::roffset(Offset::EVEN, &nhex));
 
-    let nhex = offset.r_to_hex(Offset::ODD);
+    let nhex = Offset::r_to_hex(offset.col, offset.row, Offset::ODD);
     assert_eq!(offset, Offset::roffset(Offset::ODD, &nhex));
   }
 }

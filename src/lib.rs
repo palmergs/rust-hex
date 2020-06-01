@@ -145,9 +145,14 @@ pub fn draw_hexes() -> String {
 
   con.set_stroke_style(&JsValue::from("rgba(200, 120, 120, 0.5)"));
   let layout = Layout::flat(Point::new(20.0, 20.0), Point::ORIGIN);
-  for q in 0..20 {
-    for r in 0..20 {
-      draw_hex(&con, &layout, &Hex::axial(q, r));
+  for col in 0..20 {
+    for row in 0..20 {
+      let hex = match row % 2 {
+        0 => Offset::q_to_hex(col, row, Offset::EVEN),
+        1 => Offset::q_to_hex(col, row, Offset::ODD),
+        _ => panic!("srsly? how did mod integer"),
+      };
+      draw_hex(&con, &layout, &hex);
     }
   }
   
